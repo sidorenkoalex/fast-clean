@@ -26,34 +26,30 @@ jobs:
         run: uv run pre-commit run --all-files
   # test:
   #   name: Test
+  #   needs: [lint]
   #   runs-on: ubuntu-latest
   #   services:
-  #     # Label used to access the service container
   #     postgres:
-  #       image: postgres
-  #       # Provide the password for postgres
+  #       image: postgres:17
   #       env:
   #         POSTGRES_USER: "postgres"
   #         POSTGRES_PASSWORD: "postgres"
   #         POSTGRES_DB: "test"
   #         POSTGRES_PORT: 5432
-  #       # Set health checks to wait until postgres has started
   #       options: >-
   #         --health-cmd pg_isready
   #         --health-interval 10s
   #         --health-timeout 5s
   #         --health-retries 5
   #     redis:
-  #       # Docker Hub image
-  #       image: redis
-  #       # Set health checks to wait until redis has started
+  #       image: redis:latest
   #       options: >-
   #         --health-cmd "redis-cli ping"
   #         --health-interval 10s
   #         --health-timeout 5s
   #         --health-retries 5
   #     minio:
-  #       image: bitnami/minio
+  #       image: lazybit/minio
   #       env:
   #         MINIO_ROOT_USER: admin
   #         MINIO_ROOT_PASSWORD: "12345678"
@@ -63,6 +59,10 @@ jobs:
   #         --health-timeout 5s
   #         --health-retries 5
   #         --health-start-period 30s
+  #   env:
+  #     DB__HOST: "postgres"
+  #     STORAGE__S3__ENDPOINT: "minio"
+  #     CACHE__REDIS__DSN: "redis://redis:6379/0"
   #   steps:
   #     - uses: actions/checkout@v4
   #     - name: Setup uv
@@ -74,6 +74,11 @@ jobs:
   #           requirements**.txt
   #           pyproject.toml
   #     - name: Install the project
-  #       run: uv sync --all-extras --dev
+  #       run: uv sync --all-extras
   #     - name: Test
-  #       run: uv run pytest --config-file=pytest-actions.ini --cov-report html --cov=fast_clean tests
+  #       run: uv run pytest --config-file=pytest.ini --cov-report html --cov=fast_clean tests
+  #     - name: Archive code coverage results
+  #       uses: actions/upload-artifact@v5
+  #       with:
+  #         name: code-coverage-report
+  #         path: htmlcov

@@ -108,7 +108,7 @@ jobs:
             mkdocs-material-
       - name: Install uv
         uses: astral-sh/setup-uv@v6
-      - run: uv sync
+      - run: uv sync --all-extras
       - run: .venv/bin/mkdocs gh-deploy --force
 
   release:
